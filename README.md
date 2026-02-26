@@ -20,12 +20,12 @@ Install the ATS unlocked package directly via URL:
 
 | Environment | Install Link |
 |-------------|-------------|
-| **Production** | [Install in Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tQ20000041lAfIAI) |
-| **Sandbox** | [Install in Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tQ20000041lAfIAI) |
+| **Production** | [Install in Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tQ20000041lFVIAY) |
+| **Sandbox** | [Install in Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tQ20000041lFVIAY) |
 
 Or install via CLI:
 ```bash
-sf package install --package 04tQ20000041lAfIAI --target-org <your-org-alias> --wait 15
+sf package install --package 04tQ20000041lFVIAY --target-org <your-org-alias> --wait 15
 ```
 
 ### Prerequisites (for Option 1 & 2)

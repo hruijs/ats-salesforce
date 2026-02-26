@@ -571,7 +571,7 @@ public with sharing class ATSHubController {
 
     @AuraEnabled
     public static void closeJob(Id jobId) {
-        Job__c job = new Job__c(Id = jobId, Status__c = 'Closed', Close_Date__c = Date.today());
+        Job__c job = new Job__c(Id = jobId, Status__c = 'Closed - Filled', Close_Date__c = Date.today());
         update job;
     }
 
