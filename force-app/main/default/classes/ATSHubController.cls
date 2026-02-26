@@ -108,7 +108,6 @@ public with sharing class ATSHubController {
         if (jobId != null) {
             Application__c app = new Application__c();
             app.Candidate__c = c.Id;
-            app.Contact__c = c.Id;
             app.Job__c = jobId;
             app.Stage__c = 'New';
             app.Source__c = source;
@@ -135,9 +134,9 @@ public with sharing class ATSHubController {
 
         Map<Id, Integer> appCounts = new Map<Id, Integer>();
         for (AggregateResult ar : [
-            SELECT Contact__c cId, COUNT(Id) cnt
+            SELECT Candidate__c cId, COUNT(Id) cnt
             FROM Application__c
-            GROUP BY Contact__c
+            GROUP BY Candidate__c
         ]) {
             appCounts.put((Id) ar.get('cId'), (Integer) ar.get('cnt'));
         }
@@ -173,10 +172,10 @@ public with sharing class ATSHubController {
 
             Map<Id, Integer> appCounts = new Map<Id, Integer>();
             for (AggregateResult ar : [
-                SELECT Contact__c cId, COUNT(Id) cnt
+                SELECT Candidate__c cId, COUNT(Id) cnt
                 FROM Application__c
-                WHERE Contact__c != null
-                GROUP BY Contact__c
+                WHERE Candidate__c != null
+                GROUP BY Candidate__c
             ]) {
                 appCounts.put((Id) ar.get('cId'), (Integer) ar.get('cnt'));
             }
@@ -243,7 +242,6 @@ public with sharing class ATSHubController {
 
         Application__c app = new Application__c();
         app.Candidate__c = contactId;
-        app.Contact__c = contactId;
         app.Job__c = jobId;
         app.Stage__c = 'New';
         app.Source__c = source;

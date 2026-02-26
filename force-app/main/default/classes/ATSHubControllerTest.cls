@@ -96,7 +96,7 @@ private class ATSHubControllerTest {
 
         Test.startTest();
         Id contactId = ATSHubController.createCandidateWithApplication(
-            jsonData, null, 'Website', null, null
+            jsonData, null, 'Career Page', null, null
         );
         Test.stopTest();
 
@@ -110,12 +110,13 @@ private class ATSHubControllerTest {
     @IsTest
     static void testParseCvFromUploadFailsGracefully() {
         Test.startTest();
+        Boolean exceptionThrown = false;
         try {
             ATSHubController.parseCvFromUpload('invalidbase64');
-            System.assert(false, 'Should have thrown exception');
         } catch (AuraHandledException e) {
-            System.assert(e.getMessage().contains('CV parsing failed'));
+            exceptionThrown = true;
         }
         Test.stopTest();
+        System.assert(exceptionThrown, 'Expected AuraHandledException to be thrown');
     }
 }

@@ -1,17 +1,20 @@
 {
   "packageDirectories": [
     {
+      "versionName": "ver 1.0",
+      "versionNumber": "1.0.0.NEXT",
       "path": "force-app",
       "default": true,
       "package": "ATS",
-      "versionName": "ver 1.0",
-      "versionNumber": "1.0.0.NEXT",
-      "versionDescription": "Applicant Tracking System v1.0 - CV parsing, pipeline management, interview scheduling"
+      "versionDescription": "ATS v1.0 - CV parsing, pipeline management, interview scheduling, setup wizard"
     }
   ],
   "name": "ats-salesforce",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "62.0",
-  "packageAliases": {}
+  "packageAliases": {
+    "ATS": "0HoQ20000000BoHKAU",
+    "ATS@1.0.0-1": "04tQ20000041lAfIAI"
+  }
 }

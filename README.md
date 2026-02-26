@@ -14,7 +14,21 @@ A complete Applicant Tracking System built as a single Lightning Web Component f
 
 ## Quick Install
 
-### Prerequisites
+### Option 0: Install as Salesforce Package (easiest)
+
+Install the ATS unlocked package directly via URL:
+
+| Environment | Install Link |
+|-------------|-------------|
+| **Production** | [Install in Production](https://login.salesforce.com/packaging/installPackage.apexp?p0=04tQ20000041lAfIAI) |
+| **Sandbox** | [Install in Sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=04tQ20000041lAfIAI) |
+
+Or install via CLI:
+```bash
+sf package install --package 04tQ20000041lAfIAI --target-org <your-org-alias> --wait 15
+```
+
+### Prerequisites (for Option 1 & 2)
 
 - [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecli) installed
 - A Salesforce org (Production or Sandbox) authenticated with `sf org login web`
