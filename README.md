@@ -19,15 +19,35 @@ A complete Applicant Tracking System built as a single Lightning Web Component f
 - [Salesforce CLI](https://developer.salesforce.com/tools/salesforcecli) installed
 - A Salesforce org (Production or Sandbox) authenticated with `sf org login web`
 
-### Deploy to your org
+### Option 1: One-command install (recommended)
 
 ```bash
 # 1. Clone the repository
 git clone https://github.com/hruijs/ats-salesforce.git
 cd ats-salesforce
 
-# 2. Deploy to your target org
-sf project deploy start --target-org <your-org-alias> --source-dir force-app --wait 15
+# 2. Run the installer
+./install.sh <your-org-alias>
+```
+
+The install script automatically:
+- Verifies your org connection
+- Detects sandbox vs production (adjusts test level accordingly)
+- Deploys all metadata
+- Assigns the ATS Admin permission set
+
+### Option 2: Manual deploy
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/hruijs/ats-salesforce.git
+cd ats-salesforce
+
+# 2. Deploy to your target org (sandbox)
+sf project deploy start --target-org <your-org-alias> --source-dir force-app --test-level NoTestRun --wait 30
+
+# 2. Deploy to your target org (production - runs tests)
+sf project deploy start --target-org <your-org-alias> --source-dir force-app --test-level RunLocalTests --wait 30
 
 # 3. Assign permission set to your admin user
 sf org assign permset --name ATS_Admin --target-org <your-org-alias>
