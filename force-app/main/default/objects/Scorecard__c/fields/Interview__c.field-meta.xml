@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Interview__c</fullName>
+    <label>Interview</label>
+    <referenceTo>Interview__c</referenceTo>
+    <relationshipLabel>Scorecards</relationshipLabel>
+    <relationshipName>Scorecards</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackHistory>false</trackHistory>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

@@ -1,0 +1,112 @@
+<template>
+    <div class="pipeline-container">
+        <!-- Header -->
+        <div class="pipeline-header">
+            <div class="header-left">
+                <lightning-icon icon-name="standard:opportunity" size="medium"></lightning-icon>
+                <div class="header-info">
+                    <h1 class="slds-text-heading_medium">Candidate Pipeline</h1>
+                    <p class="slds-text-body_small slds-text-color_weak" if:true={jobTitle}>
+                        {jobTitle} &bull; {totalActive} active candidates
+                    </p>
+                </div>
+            </div>
+            <div class="header-right">
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    alternative-text="Refresh"
+                    onclick={handleRefresh}
+                    class="slds-m-right_small">
+                </lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- Stats Bar -->
+        <div class="stats-bar" if:true={stats}>
+            <div class="stat-item">
+                <span class="stat-number">{stats.totalActive}</span>
+                <span class="stat-label">Active</span>
+            </div>
+            <div class="stat-item stat-hired">
+                <span class="stat-number">{stats.totalHired}</span>
+                <span class="stat-label">Hired</span>
+            </div>
+            <div class="stat-item stat-rejected">
+                <span class="stat-number">{stats.totalRejected}</span>
+                <span class="stat-label">Rejected</span>
+            </div>
+        </div>
+
+        <!-- Kanban Board -->
+        <div class="kanban-board">
+            <template for:each={stages} for:item="stage">
+                <div key={stage.name} class={stage.columnClass}
+                     ondrop={handleDrop}
+                     ondragover={handleDragOver}
+                     ondragleave={handleDragLeave}
+                     data-stage={stage.name}>
+
+                    <!-- Column Header -->
+                    <div class="column-header">
+                        <div class="column-header-left">
+                            <span class={stage.dotClass}></span>
+                            <span class="column-title">{stage.label}</span>
+                        </div>
+                        <span class="column-count">{stage.count}</span>
+                    </div>
+
+                    <!-- Cards -->
+                    <div class="column-body">
+                        <template for:each={stage.applications} for:item="app">
+                            <div key={app.id}
+                                 class="candidate-card"
+                                 draggable="true"
+                                 ondragstart={handleDragStart}
+                                 data-id={app.id}>
+
+                                <div class="card-header">
+                                    <div class="avatar" data-initials={app.initials}>
+                                        {app.initials}
+                                    </div>
+                                    <div class="card-header-info">
+                                        <p class="card-name">{app.candidateName}</p>
+                                        <p class="card-title">{app.currentJobTitle}</p>
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    <template if:true={app.overallRating}>
+                                        <div class="card-rating">
+                                            <template for:each={app.stars} for:item="star">
+                                                <span key={star.index} class={star.class}>&#9733;</span>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <div class="card-meta">
+                                        <template if:true={app.source}>
+                                            <span class="card-badge source-badge">{app.source}</span>
+                                        </template>
+                                        <span class="card-days">{app.daysInStage}d</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Empty Column State -->
+                        <template if:false={stage.hasApplications}>
+                            <div class="empty-column">
+                                <p>No candidates</p>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </div>
+
+    <!-- Loading -->
+    <template if:true={isLoading}>
+        <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+    </template>
+</template>

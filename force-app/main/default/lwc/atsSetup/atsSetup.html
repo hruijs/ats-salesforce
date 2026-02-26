@@ -1,0 +1,302 @@
+<template>
+    <div class="setup-container">
+        <!-- Header -->
+        <div class="setup-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <lightning-icon icon-name="custom:custom63" size="large"></lightning-icon>
+                    <div class="header-text">
+                        <h1 class="slds-text-heading_large">ATS Setup</h1>
+                        <p class="slds-text-body_regular slds-text-color_weak">Applicant Tracking System Configuration</p>
+                    </div>
+                </div>
+                <template lwc:if={hasStatus}>
+                    <lightning-badge label={status.packageVersion} class="version-badge"></lightning-badge>
+                </template>
+            </div>
+        </div>
+
+        <!-- Loading -->
+        <template lwc:if={isLoading}>
+            <div class="slds-align_absolute-center slds-p-around_xx-large">
+                <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+            </div>
+        </template>
+
+        <!-- Error -->
+        <template lwc:if={error}>
+            <div class="slds-notify slds-notify_alert slds-alert_error slds-m-around_medium" role="alert">
+                <lightning-icon icon-name="utility:error" variant="inverse" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                {error}
+            </div>
+        </template>
+
+        <template lwc:if={hasStatus}>
+            <!-- Overall Status Banner -->
+            <div class="status-banner">
+                <lightning-icon icon-name={overallIcon} variant={apiStatusVariant} size="small" class="slds-m-right_small"></lightning-icon>
+                <span class="status-message">{overallMessage}</span>
+                <template lwc:if={overallReady}>
+                    <lightning-button label="Open ATS Hub" variant="brand" onclick={handleOpenHub} class="slds-m-left_medium" icon-name="utility:open"></lightning-button>
+                </template>
+            </div>
+
+            <div class="setup-grid">
+                <!-- CV Parser Configuration Card -->
+                <div class="setup-card">
+                    <div class="card-header">
+                        <div class="card-title-row">
+                            <lightning-icon icon-name="utility:apex" size="small" class="slds-m-right_small"></lightning-icon>
+                            <h2 class="slds-text-heading_small">CV Parser (Gemini AI)</h2>
+                        </div>
+                        <lightning-badge label={apiStatusLabel} class={apiStatusVariant}></lightning-badge>
+                    </div>
+
+                    <div class="card-body">
+                        <template lwc:if={showApiForm}>
+                            <!-- Edit Form -->
+                            <div class="api-form">
+                                <lightning-input
+                                    type="password"
+                                    label="API Key"
+                                    value={apiKey}
+                                    onchange={handleApiKeyChange}
+                                    placeholder="Enter your Gemini API key"
+                                    class="slds-m-bottom_small">
+                                </lightning-input>
+                                <lightning-input
+                                    type="url"
+                                    label="API Endpoint"
+                                    value={apiEndpoint}
+                                    onchange={handleEndpointChange}
+                                    class="slds-m-bottom_small">
+                                </lightning-input>
+                                <lightning-combobox
+                                    label="Model"
+                                    value={apiModel}
+                                    options={modelOptions}
+                                    onchange={handleModelChange}
+                                    class="slds-m-bottom_medium">
+                                </lightning-combobox>
+                                <div class="form-actions">
+                                    <lightning-button label="Cancel" onclick={handleCancelApi}></lightning-button>
+                                    <lightning-button label="Save Settings" variant="brand" onclick={handleSaveApi} disabled={isSavingApi}>
+                                    </lightning-button>
+                                </div>
+                            </div>
+                        </template>
+
+                        <template lwc:else>
+                            <!-- Display Mode -->
+                            <div class="setting-rows">
+                                <div class="setting-row">
+                                    <span class="setting-label">API Key</span>
+                                    <span class="setting-value">{status.maskedApiKey}</span>
+                                </div>
+                                <div class="setting-row">
+                                    <span class="setting-label">Endpoint</span>
+                                    <span class="setting-value setting-url">{status.apiEndpoint}</span>
+                                </div>
+                                <div class="setting-row">
+                                    <span class="setting-label">Model</span>
+                                    <span class="setting-value">{status.modelName}</span>
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                <lightning-button label="Edit Settings" onclick={handleEditApi} icon-name="utility:edit"></lightning-button>
+                                <lightning-button
+                                    label="Test Connection"
+                                    onclick={handleTestConnection}
+                                    disabled={isTesting}
+                                    icon-name="utility:refresh"
+                                    variant="neutral">
+                                </lightning-button>
+                            </div>
+                            <template lwc:if={isTesting}>
+                                <div class="slds-m-top_small">
+                                    <lightning-spinner alternative-text="Testing" size="small"></lightning-spinner>
+                                </div>
+                            </template>
+                            <template lwc:if={testResult}>
+                                <div class={testResultClass}>
+                                    <lightning-icon
+                                        icon-name={testResultIcon}
+                                        size="x-small"
+                                        variant={testResultVariant}
+                                        class="slds-m-right_x-small">
+                                    </lightning-icon>
+                                    {testResult}
+                                </div>
+                            </template>
+                        </template>
+                    </div>
+
+                    <div class="card-footer">
+                        <p class="help-text">
+                            The CV Parser uses Google Gemini AI to extract candidate data from uploaded PDF resumes.
+                            Get your API key at <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">Google AI Studio</a>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Permission Set Card -->
+                <div class="setup-card">
+                    <div class="card-header">
+                        <div class="card-title-row">
+                            <lightning-icon icon-name="utility:people" size="small" class="slds-m-right_small"></lightning-icon>
+                            <h2 class="slds-text-heading_small">User Access</h2>
+                        </div>
+                        <lightning-badge label={permStatusLabel} class={permStatusVariant}></lightning-badge>
+                    </div>
+
+                    <div class="card-body">
+                        <template lwc:if={hasAssignedUsers}>
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-m-bottom_small user-table">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">User</th>
+                                        <th scope="col">Profile</th>
+                                        <th scope="col" class="action-col"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template for:each={assignedUsers} for:item="user">
+                                        <tr key={user.userId}>
+                                            <td>
+                                                <lightning-icon icon-name="standard:user" size="x-small" class="slds-m-right_x-small"></lightning-icon>
+                                                {user.userName}
+                                            </td>
+                                            <td class="slds-text-color_weak">{user.profileName}</td>
+                                            <td class="action-col">
+                                                <lightning-button-icon
+                                                    icon-name="utility:close"
+                                                    variant="bare"
+                                                    alternative-text="Remove"
+                                                    size="small"
+                                                    data-id={user.userId}
+                                                    data-name={user.userName}
+                                                    onclick={handleRemoveUser}>
+                                                </lightning-button-icon>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                        </template>
+
+                        <template lwc:else>
+                            <div class="empty-state slds-m-bottom_small">
+                                <lightning-icon icon-name="utility:warning" variant="warning" size="small" class="slds-m-bottom_x-small"></lightning-icon>
+                                <p>No users have been assigned the ATS permission set yet.</p>
+                            </div>
+                        </template>
+
+                        <template lwc:if={showAddUsers}>
+                            <div class="add-users-form">
+                                <template lwc:if={isLoadingUsers}>
+                                    <lightning-spinner alternative-text="Loading users" size="small"></lightning-spinner>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-dual-listbox
+                                        label="Select Users"
+                                        source-label="Available Users"
+                                        selected-label="Selected Users"
+                                        options={userOptions}
+                                        value={selectedUserIds}
+                                        onchange={handleUserSelection}
+                                        class="slds-m-bottom_small">
+                                    </lightning-dual-listbox>
+                                    <div class="form-actions">
+                                        <lightning-button label="Cancel" onclick={handleCancelAddUsers}></lightning-button>
+                                        <lightning-button
+                                            label="Assign Permission Set"
+                                            variant="brand"
+                                            onclick={handleAssignUsers}
+                                            disabled={isAssigning}>
+                                        </lightning-button>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        <template lwc:else>
+                            <lightning-button label="Add Users" variant="neutral" onclick={handleShowAddUsers} icon-name="utility:add"></lightning-button>
+                        </template>
+                    </div>
+
+                    <div class="card-footer">
+                        <p class="help-text">
+                            Users need the "ATS User" permission set to access the ATS Hub, manage candidates, jobs, and interviews.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Quick Start Card -->
+                <div class="setup-card quick-start-card">
+                    <div class="card-header">
+                        <div class="card-title-row">
+                            <lightning-icon icon-name="utility:rocket" size="small" class="slds-m-right_small"></lightning-icon>
+                            <h2 class="slds-text-heading_small">Quick Start Guide</h2>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <ol class="guide-steps">
+                            <li class="guide-step">
+                                <div class="step-icon">
+                                    <lightning-icon
+                                        icon-name={step1Icon}
+                                        size="xx-small"
+                                        variant={step1Variant}>
+                                    </lightning-icon>
+                                </div>
+                                <div class="step-content">
+                                    <strong>Configure CV Parser</strong>
+                                    <p>Set up your Google Gemini API key to enable automatic CV/resume parsing.</p>
+                                </div>
+                            </li>
+                            <li class="guide-step">
+                                <div class="step-icon">
+                                    <lightning-icon
+                                        icon-name={step2Icon}
+                                        size="xx-small"
+                                        variant={step2Variant}>
+                                    </lightning-icon>
+                                </div>
+                                <div class="step-content">
+                                    <strong>Assign Users</strong>
+                                    <p>Give recruiters and hiring managers access to the ATS.</p>
+                                </div>
+                            </li>
+                            <li class="guide-step">
+                                <div class="step-icon">
+                                    <lightning-icon icon-name="utility:dash" size="xx-small" variant="warning"></lightning-icon>
+                                </div>
+                                <div class="step-content">
+                                    <strong>Create Your First Job</strong>
+                                    <p>Open the ATS Hub and create a job opening to start receiving applications.</p>
+                                </div>
+                            </li>
+                            <li class="guide-step">
+                                <div class="step-icon">
+                                    <lightning-icon icon-name="utility:dash" size="xx-small" variant="warning"></lightning-icon>
+                                </div>
+                                <div class="step-content">
+                                    <strong>Upload a CV</strong>
+                                    <p>Go to "New Candidate" to upload and parse your first resume.</p>
+                                </div>
+                            </li>
+                        </ol>
+                    </div>
+                    <div class="card-footer">
+                        <lightning-button
+                            label="Open ATS Hub"
+                            variant="brand"
+                            onclick={handleOpenHub}
+                            icon-name="utility:open"
+                            class="open-hub-btn">
+                        </lightning-button>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

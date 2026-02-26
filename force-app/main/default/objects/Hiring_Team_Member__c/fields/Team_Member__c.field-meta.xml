@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Team_Member__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Team Member</label>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Hiring_Team_Memberships</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Lookup</type>
+</CustomField>

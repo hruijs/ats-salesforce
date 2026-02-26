@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Sub_Status__c</fullName>
+    <label>Sub Status</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Under Review</fullName><default>false</default><label>Under Review</label></value>
+            <value><fullName>Phone Screen Scheduled</fullName><default>false</default><label>Phone Screen Scheduled</label></value>
+            <value><fullName>Phone Screen Complete</fullName><default>false</default><label>Phone Screen Complete</label></value>
+            <value><fullName>Assessment Sent</fullName><default>false</default><label>Assessment Sent</label></value>
+            <value><fullName>Assessment Complete</fullName><default>false</default><label>Assessment Complete</label></value>
+            <value><fullName>Interview Scheduled</fullName><default>false</default><label>Interview Scheduled</label></value>
+            <value><fullName>Interview Complete</fullName><default>false</default><label>Interview Complete</label></value>
+            <value><fullName>Awaiting Feedback</fullName><default>false</default><label>Awaiting Feedback</label></value>
+            <value><fullName>Debrief Scheduled</fullName><default>false</default><label>Debrief Scheduled</label></value>
+            <value><fullName>Offer Pending Approval</fullName><default>false</default><label>Offer Pending Approval</label></value>
+            <value><fullName>Offer Extended</fullName><default>false</default><label>Offer Extended</label></value>
+            <value><fullName>Offer Accepted</fullName><default>false</default><label>Offer Accepted</label></value>
+            <value><fullName>Offer Declined</fullName><default>false</default><label>Offer Declined</label></value>
+            <value><fullName>Pre-boarding</fullName><default>false</default><label>Pre-boarding</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,1640 @@
+<template>
+    <div class="hub-container">
+        <!-- Navigation Bar -->
+        <div class="hub-nav">
+            <div class="nav-left">
+                <h1 class="hub-title">ATS Hub</h1>
+            </div>
+            <div class="nav-tabs">
+                <button class={tabDashboardClass} data-tab="dashboard" onclick={handleTabClick}>
+                    <lightning-icon icon-name="utility:chart" size="xx-small" class="tab-icon"></lightning-icon>
+                    Dashboard
+                </button>
+                <button class={tabNewCandidateClass} data-tab="newCandidate" onclick={handleTabClick}>
+                    <lightning-icon icon-name="utility:add" size="xx-small" class="tab-icon"></lightning-icon>
+                    New Candidate
+                </button>
+                <button class={tabCandidatesClass} data-tab="candidates" onclick={handleTabClick}>
+                    <lightning-icon icon-name="utility:people" size="xx-small" class="tab-icon"></lightning-icon>
+                    Candidates
+                </button>
+                <button class={tabPipelineClass} data-tab="pipeline" onclick={handleTabClick}>
+                    <lightning-icon icon-name="utility:kanban" size="xx-small" class="tab-icon"></lightning-icon>
+                    Pipeline
+                </button>
+            </div>
+            <div class="nav-right">
+                <lightning-button
+                    label="New Job"
+                    variant="brand"
+                    icon-name="utility:add"
+                    onclick={handleNewJob}
+                    class="slds-m-right_small">
+                </lightning-button>
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    alternative-text="Refresh"
+                    onclick={handleRefresh}
+                    variant="border-filled">
+                </lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- ═══════════ DASHBOARD TAB ═══════════ -->
+        <div class={dashboardContentClass}>
+                <!-- Dashboard Loading Overlay -->
+                <template if:true={dashboardLoading}>
+                    <div class="loading-overlay">
+                        <lightning-spinner alternative-text="Refreshing..." size="medium"></lightning-spinner>
+                        <p class="loading-text">Refreshing dashboard...</p>
+                    </div>
+                </template>
+
+                <!-- Summary Cards -->
+                <div class="summary-row" if:true={hasData}>
+                    <div class="summary-card">
+                        <div class="summary-icon blue">
+                            <lightning-icon icon-name="utility:cases" size="small" variant="inverse"></lightning-icon>
+                        </div>
+                        <div class="summary-info">
+                            <span class="summary-number">{totalOpenJobs}</span>
+                            <span class="summary-label">Open Positions</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon purple">
+                            <lightning-icon icon-name="utility:people" size="small" variant="inverse"></lightning-icon>
+                        </div>
+                        <div class="summary-info">
+                            <span class="summary-number">{totalActiveCandidates}</span>
+                            <span class="summary-label">Active Candidates</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon orange">
+                            <lightning-icon icon-name="utility:event" size="small" variant="inverse"></lightning-icon>
+                        </div>
+                        <div class="summary-info">
+                            <span class="summary-number">{totalInterviewsThisWeek}</span>
+                            <span class="summary-label">Interviews This Week</span>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon green">
+                            <lightning-icon icon-name="utility:check" size="small" variant="inverse"></lightning-icon>
+                        </div>
+                        <div class="summary-info">
+                            <span class="summary-number">{totalHired}</span>
+                            <span class="summary-label">Hired</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Cards -->
+                <div class="jobs-grid" if:true={hasData}>
+                    <template for:each={dashboardData} for:item="item">
+                        <div key={item.job.Id} class="job-card" data-id={item.job.Id} onclick={handleJobCardClick}>
+                            <div class="job-card-header">
+                                <div class="job-info">
+                                    <h2 class="job-title">{item.job.Title__c}</h2>
+                                    <div class="job-meta">
+                                        <template if:true={item.job.Department__c}>
+                                            <span class="meta-badge dept-badge">{item.job.Department__c}</span>
+                                        </template>
+                                        <template if:true={item.job.Location__c}>
+                                            <span class="meta-badge loc-badge">{item.job.Location__c}</span>
+                                        </template>
+                                        <template if:true={item.job.Job_Type__c}>
+                                            <span class="meta-badge type-badge">{item.job.Job_Type__c}</span>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div class="job-card-actions">
+                                    <div class={item.priorityClass}>{item.job.Priority__c}</div>
+                                    <lightning-button-icon
+                                        icon-name="utility:edit"
+                                        alternative-text="Edit Job"
+                                        size="small"
+                                        data-id={item.job.Id}
+                                        onclick={handleEditJob}
+                                        class="edit-btn">
+                                    </lightning-button-icon>
+                                </div>
+                            </div>
+
+                            <div class="mini-pipeline">
+                                <div class="pipeline-stage">
+                                    <div class="stage-bar new-bar" style={item.newBarStyle}></div>
+                                    <span class="stage-count">{item.stats.totalNew}</span>
+                                    <span class="stage-name">New</span>
+                                </div>
+                                <div class="pipeline-stage">
+                                    <div class="stage-bar screening-bar" style={item.screeningBarStyle}></div>
+                                    <span class="stage-count">{item.stats.totalScreening}</span>
+                                    <span class="stage-name">Screen</span>
+                                </div>
+                                <div class="pipeline-stage">
+                                    <div class="stage-bar interview-bar" style={item.interviewBarStyle}></div>
+                                    <span class="stage-count">{item.stats.totalInterview}</span>
+                                    <span class="stage-name">Interview</span>
+                                </div>
+                                <div class="pipeline-stage">
+                                    <div class="stage-bar eval-bar" style={item.evalBarStyle}></div>
+                                    <span class="stage-count">{item.stats.totalEvaluation}</span>
+                                    <span class="stage-name">Eval</span>
+                                </div>
+                                <div class="pipeline-stage">
+                                    <div class="stage-bar offer-bar" style={item.offerBarStyle}></div>
+                                    <span class="stage-count">{item.stats.totalOffer}</span>
+                                    <span class="stage-name">Offer</span>
+                                </div>
+                                <div class="pipeline-stage">
+                                    <div class="stage-bar hired-bar" style={item.hiredBarStyle}></div>
+                                    <span class="stage-count">{item.stats.totalHired}</span>
+                                    <span class="stage-name">Hired</span>
+                                </div>
+                            </div>
+
+                            <div class="job-card-footer">
+                                <div class="footer-stats">
+                                    <span class="footer-stat"><strong>{item.totalApplications}</strong> applications</span>
+                                    <span class="footer-divider">&bull;</span>
+                                    <span class="footer-stat"><strong>{item.interviewsThisWeek}</strong> interviews this week</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Upcoming Interviews -->
+                <template if:true={hasUpcomingInterviews}>
+                    <div class="upcoming-section">
+                        <div class="upcoming-header">
+                            <h3 class="upcoming-title">
+                                <lightning-icon icon-name="utility:event" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Upcoming Interviews
+                            </h3>
+                        </div>
+                        <div class="upcoming-list">
+                            <template for:each={upcomingInterviews} for:item="ui">
+                                <div key={ui.id} class="upcoming-card" data-id={ui.id} onclick={handleUpcomingCardClick}>
+                                    <div class="upcoming-datetime">
+                                        <span class="upcoming-day">{ui.formattedDay}</span>
+                                        <span class="upcoming-time">{ui.formattedTime}</span>
+                                    </div>
+                                    <div class="upcoming-avatar">{ui.candidateInitials}</div>
+                                    <div class="upcoming-info">
+                                        <span class="upcoming-candidate">{ui.candidateName}</span>
+                                        <span class="upcoming-job">{ui.jobTitle}</span>
+                                    </div>
+                                    <template if:true={ui.hasInterviewers}>
+                                        <div class="upcoming-interviewers">
+                                            <lightning-icon icon-name="utility:user" size="xx-small"></lightning-icon>
+                                            <span>{ui.interviewersDisplay}</span>
+                                        </div>
+                                    </template>
+                                    <span class="upcoming-type-badge">{ui.interviewType}</span>
+                                    <span class={ui.statusBadgeClass}>{ui.status}</span>
+                                    <lightning-button-icon
+                                        icon-name="utility:edit"
+                                        alternative-text="Edit"
+                                        size="small"
+                                        variant="bare"
+                                        class="upcoming-edit-btn">
+                                    </lightning-button-icon>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Empty State -->
+                <template if:false={hasData}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="standard:opportunity" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                        <h2 class="slds-text-heading_small">No Open Positions</h2>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_small slds-m-bottom_medium">
+                            Create your first job to start building your recruitment pipeline.
+                        </p>
+                        <lightning-button
+                            label="Create First Job"
+                            variant="brand"
+                            icon-name="utility:add"
+                            onclick={handleNewJob}>
+                        </lightning-button>
+                    </div>
+                </template>
+        </div>
+
+        <!-- ═══════════ NEW CANDIDATE TAB ═══════════ -->
+        <div class={newCandidateContentClass}>
+                <!-- Success State -->
+                <template if:true={createSuccess}>
+                    <div class="success-state">
+                        <div class="success-icon-wrap">
+                            <lightning-icon icon-name="utility:success" size="large" variant="inverse"></lightning-icon>
+                        </div>
+                        <h2 class="success-heading">Candidate Added Successfully!</h2>
+                        <p class="success-text">
+                            {parsedData.firstName} {parsedData.lastName} has been created and added to the system.
+                        </p>
+                        <div class="success-actions">
+                            <lightning-button
+                                label="View Contact"
+                                variant="brand"
+                                icon-name="utility:user"
+                                onclick={handleViewContact}
+                                class="slds-m-right_small">
+                            </lightning-button>
+                            <lightning-button
+                                label="View in Candidates"
+                                variant="neutral"
+                                icon-name="utility:people"
+                                onclick={handleViewInCandidates}
+                                class="slds-m-right_small">
+                            </lightning-button>
+                            <lightning-button
+                                label="Add Another Candidate"
+                                variant="neutral"
+                                icon-name="utility:add"
+                                onclick={handleNewCandidate}>
+                            </lightning-button>
+                        </div>
+                    </div>
+                </template>
+
+                <!-- Upload + Parse Form -->
+                <template if:false={createSuccess}>
+                    <!-- Status Banners -->
+                    <template if:true={isParsing}>
+                        <div class="parsing-banner">
+                            <lightning-spinner alternative-text="Parsing..." size="small" class="slds-m-right_small"></lightning-spinner>
+                            <span>AI is reading the CV... This may take a few seconds.</span>
+                        </div>
+                    </template>
+                    <template if:true={parseSuccess}>
+                        <div class="success-banner">
+                            <lightning-icon icon-name="utility:success" size="x-small" variant="inverse" class="slds-m-right_small"></lightning-icon>
+                            <span>CV successfully parsed! Review the data below, select a job, and click Create Candidate.</span>
+                        </div>
+                    </template>
+                    <template if:true={parseError}>
+                        <div class="error-banner">
+                            <lightning-icon icon-name="utility:error" size="x-small" variant="inverse" class="slds-m-right_small"></lightning-icon>
+                            <span>{errorMessage}</span>
+                        </div>
+                    </template>
+
+                    <div class="candidate-layout">
+                        <!-- Left: Upload + PDF Preview -->
+                        <div class="upload-panel">
+                            <div class="panel-header-section">
+                                <lightning-icon icon-name="doctype:pdf" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                <span class="panel-title-text">CV Upload</span>
+                            </div>
+
+                            <div class={dropZoneClass}>
+                                <div class="drop-zone"
+                                     ondragover={handleDropZoneDragOver}
+                                     ondragleave={handleDropZoneDragLeave}
+                                     ondrop={handleDropZoneDrop}>
+                                    <lightning-icon icon-name="utility:upload" size="large" class="drop-icon"></lightning-icon>
+                                    <h3 class="drop-title">Drop PDF here</h3>
+                                    <p class="drop-text">or click to browse</p>
+                                    <input type="file" accept=".pdf" class="file-input" onchange={handleFileChange} />
+                                </div>
+                            </div>
+
+                            <div class={pdfViewClass}>
+                                <div class="pdf-actions">
+                                    <div class="file-info">
+                                        <lightning-icon icon-name="doctype:pdf" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                        <span class="file-name">{pdfFileName}</span>
+                                    </div>
+                                    <div class="pdf-buttons">
+                                        <lightning-button
+                                            label={parseButtonLabel}
+                                            variant="brand"
+                                            icon-name="utility:magicwand"
+                                            onclick={handleParseCv}
+                                            disabled={isParseDisabled}
+                                            class="slds-m-right_small">
+                                        </lightning-button>
+                                        <lightning-button
+                                            label="Change File"
+                                            variant="neutral"
+                                            icon-name="utility:replace"
+                                            onclick={handleNewCandidate}
+                                            disabled={isParsing}>
+                                        </lightning-button>
+                                    </div>
+                                </div>
+                                <!-- File display (no iframe - blocked by LWS) -->
+                                <div class="pdf-preview-wrap">
+                                    <template if:true={isParsing}>
+                                        <div class="pdf-parsing-overlay">
+                                            <lightning-spinner alternative-text="Parsing..." size="large"></lightning-spinner>
+                                            <p class="overlay-text">AI is analyzing the CV...</p>
+                                        </div>
+                                    </template>
+                                    <div class="file-uploaded-display">
+                                        <div class="file-uploaded-icon">
+                                            <lightning-icon icon-name="doctype:pdf" size="large"></lightning-icon>
+                                        </div>
+                                        <h3 class="file-uploaded-name">{pdfFileName}</h3>
+                                        <p class="file-uploaded-size">{pdfFileSize}</p>
+                                        <p class="file-uploaded-hint">Click "Parse CV" to extract candidate data using AI</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Parsed Data -->
+                        <div class="data-panel">
+                            <div class="panel-header-section">
+                                <lightning-icon icon-name="utility:user" size="small" class="slds-m-right_x-small"></lightning-icon>
+                                <span class="panel-title-text">Candidate Data</span>
+                            </div>
+
+                            <div class={parsedDataClass}>
+                                <div class="data-scroll">
+                                    <!-- Creating Overlay -->
+                                    <template if:true={isCreating}>
+                                        <div class="creating-overlay">
+                                            <lightning-spinner alternative-text="Creating..." size="medium"></lightning-spinner>
+                                            <p class="overlay-text">Creating candidate...</p>
+                                        </div>
+                                    </template>
+
+                                    <!-- Job Assignment -->
+                                    <div class="data-section assignment-section">
+                                        <h3 class="section-title">
+                                            <lightning-icon icon-name="utility:assignment" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            Job Assignment
+                                        </h3>
+                                        <div class="form-grid">
+                                            <lightning-combobox
+                                                label="Assign to Job"
+                                                value={selectedJobId}
+                                                options={jobOptions}
+                                                onchange={handleJobSelect}
+                                                class="form-field">
+                                            </lightning-combobox>
+                                            <lightning-combobox
+                                                label="Source"
+                                                value={selectedSource}
+                                                options={sourceOptions}
+                                                onchange={handleSourceSelect}
+                                                class="form-field">
+                                            </lightning-combobox>
+                                        </div>
+                                    </div>
+
+                                    <!-- Personal Info -->
+                                    <div class="data-section">
+                                        <h3 class="section-title">
+                                            <lightning-icon icon-name="utility:identity" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            Personal Information
+                                        </h3>
+                                        <div class="form-grid">
+                                            <lightning-input label="First Name" value={parsedData.firstName} data-field="firstName" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                            <lightning-input label="Last Name" value={parsedData.lastName} data-field="lastName" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                            <lightning-input label="Email" type="email" value={parsedData.email} data-field="email" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                            <lightning-input label="Phone" type="tel" value={parsedData.phone} data-field="phone" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                            <lightning-input label="LinkedIn URL" type="url" value={parsedData.linkedInUrl} data-field="linkedInUrl" onchange={handleFieldChange} class="form-field full-width"></lightning-input>
+                                        </div>
+                                    </div>
+
+                                    <!-- Professional -->
+                                    <div class="data-section">
+                                        <h3 class="section-title">
+                                            <lightning-icon icon-name="utility:company" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            Professional
+                                        </h3>
+                                        <div class="form-grid">
+                                            <lightning-input label="Current Job Title" value={parsedData.currentJobTitle} data-field="currentJobTitle" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                            <lightning-input label="Current Company" value={parsedData.currentCompany} data-field="currentCompany" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                            <lightning-input label="Years of Experience" type="number" value={parsedData.yearsOfExperience} data-field="yearsOfExperience" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                            <lightning-input label="Availability" value={parsedData.availability} data-field="availability" onchange={handleFieldChange} class="form-field"></lightning-input>
+                                        </div>
+                                        <lightning-textarea label="Professional Summary" value={parsedData.summary} data-field="summary" onchange={handleFieldChange} class="slds-m-top_small"></lightning-textarea>
+                                    </div>
+
+                                    <!-- Skills & Languages -->
+                                    <div class="data-section">
+                                        <h3 class="section-title">
+                                            <lightning-icon icon-name="utility:light_bulb" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                            Skills & Languages
+                                        </h3>
+                                        <template if:true={hasSkills}>
+                                            <div class="tags-container">
+                                                <template for:each={parsedData.skills} for:item="skill">
+                                                    <span key={skill} class="tag skill-tag">{skill}</span>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <template if:true={hasLanguages}>
+                                            <p class="tags-label">Languages</p>
+                                            <div class="tags-container">
+                                                <template for:each={parsedData.languages} for:item="lang">
+                                                    <span key={lang} class="tag lang-tag">{lang}</span>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Education -->
+                                    <template if:true={hasEducation}>
+                                        <div class="data-section">
+                                            <h3 class="section-title">
+                                                <lightning-icon icon-name="utility:knowledge_base" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                Education
+                                            </h3>
+                                            <template for:each={parsedData.education} for:item="edu">
+                                                <div key={edu.institution} class="timeline-item">
+                                                    <div class="timeline-dot edu-dot"></div>
+                                                    <div class="timeline-content">
+                                                        <p class="timeline-title">{edu.degree} - {edu.fieldOfStudy}</p>
+                                                        <p class="timeline-subtitle">{edu.institution}</p>
+                                                        <p class="timeline-date">{edu.startYear} - {edu.endYear}</p>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Work Experience -->
+                                    <template if:true={hasWorkExperience}>
+                                        <div class="data-section">
+                                            <h3 class="section-title">
+                                                <lightning-icon icon-name="utility:work_order_type" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                Work Experience
+                                            </h3>
+                                            <template for:each={parsedData.workExperience} for:item="exp">
+                                                <div key={exp.company} class="timeline-item">
+                                                    <div class="timeline-dot exp-dot"></div>
+                                                    <div class="timeline-content">
+                                                        <p class="timeline-title">{exp.jobTitle}</p>
+                                                        <p class="timeline-subtitle">{exp.company}</p>
+                                                        <p class="timeline-date">{exp.startDate} - {exp.endDate}</p>
+                                                        <template if:true={exp.description}>
+                                                            <p class="timeline-description">{exp.description}</p>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+
+                                    <!-- Create Button -->
+                                    <div class="create-bar">
+                                        <lightning-button
+                                            label={createButtonLabel}
+                                            variant="brand"
+                                            icon-name="utility:check"
+                                            onclick={handleCreateCandidate}
+                                            disabled={isCreateDisabled}
+                                            class="create-btn">
+                                        </lightning-button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Empty state -->
+                            <div class={emptyDataClass}>
+                                <div class="empty-state">
+                                    <lightning-icon icon-name="utility:magicwand" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                                    <h2 class="slds-text-heading_small slds-m-bottom_x-small">Ready to Parse</h2>
+                                    <p class="slds-text-body_small slds-text-color_weak">
+                                        Upload a PDF and click "Parse CV" to extract candidate data using AI.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+        </div>
+
+        <!-- ═══════════ CANDIDATES TAB ═══════════ -->
+        <div class={candidatesContentClass}>
+                <!-- Toolbar -->
+                <div class="candidates-toolbar">
+                    <div class="candidates-search-wrap">
+                        <lightning-input
+                            type="search"
+                            placeholder="Search by name, email, title, company, or skills..."
+                            value={candidateSearchTerm}
+                            onchange={handleCandidateSearch}
+                            variant="label-hidden"
+                            class="candidates-search">
+                        </lightning-input>
+                    </div>
+                    <span class="candidates-count">{candidateCountLabel}</span>
+                </div>
+
+                <!-- Loading -->
+                <template if:true={candidatesLoading}>
+                    <div class="loading-wrap">
+                        <lightning-spinner alternative-text="Loading candidates..." size="medium"></lightning-spinner>
+                        <p class="loading-text">Loading candidates...</p>
+                    </div>
+                </template>
+
+                <!-- Grid -->
+                <template if:false={candidatesLoading}>
+                    <template if:true={hasCandidates}>
+                        <div class="candidates-grid">
+                            <template for:each={candidatesList} for:item="cand">
+                                <div key={cand.contactId} class="candidate-list-card" data-id={cand.contactId} onclick={handleCandidateCardClick}>
+                                    <div class="clc-header">
+                                        <div class="clc-avatar">{cand.initials}</div>
+                                        <div class="clc-info">
+                                            <p class="clc-name">{cand.name}</p>
+                                            <template if:true={cand.currentJobTitle}>
+                                                <p class="clc-title">{cand.currentJobTitle}</p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                    <div class="clc-details">
+                                        <template if:true={cand.email}>
+                                            <p class="clc-detail-row">
+                                                <lightning-icon icon-name="utility:email" size="xx-small" class="clc-detail-icon"></lightning-icon>
+                                                {cand.email}
+                                            </p>
+                                        </template>
+                                        <template if:true={cand.currentCompany}>
+                                            <p class="clc-detail-row">
+                                                <lightning-icon icon-name="utility:company" size="xx-small" class="clc-detail-icon"></lightning-icon>
+                                                {cand.currentCompany}
+                                            </p>
+                                        </template>
+                                    </div>
+                                    <template if:true={cand.hasSkillTags}>
+                                        <div class="clc-skills">
+                                            <template for:each={cand.skillTags} for:item="skill">
+                                                <span key={skill} class="clc-skill-tag">{skill}</span>
+                                            </template>
+                                            <template if:true={cand.moreSkillsCount}>
+                                                <span class="clc-skill-more">+{cand.moreSkillsCount}</span>
+                                            </template>
+                                        </div>
+                                    </template>
+                                    <div class="clc-footer">
+                                        <template if:true={cand.candidateSource}>
+                                            <span class={cand.sourceBadgeClass}>{cand.candidateSource}</span>
+                                        </template>
+                                        <span class="clc-date">{cand.formattedDate}</span>
+                                        <template if:true={cand.applicationCount}>
+                                            <span class="clc-apps">{cand.applicationCount} apps</span>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+
+                    <!-- Empty State -->
+                    <template if:false={hasCandidates}>
+                        <div class="empty-state">
+                            <lightning-icon icon-name="utility:people" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                            <h2 class="slds-text-heading_small">No Candidates Found</h2>
+                            <p class="slds-text-body_small slds-text-color_weak slds-m-top_small slds-m-bottom_medium">
+                                {candidatesEmptyMessage}
+                            </p>
+                            <lightning-button
+                                label="Add New Candidate"
+                                variant="brand"
+                                icon-name="utility:add"
+                                onclick={handleGoToNewCandidate}>
+                            </lightning-button>
+                        </div>
+                    </template>
+                </template>
+        </div>
+
+        <!-- ═══════════ PIPELINE TAB ═══════════ -->
+        <div class={pipelineContentClass}>
+                <!-- Pipeline Updating Overlay -->
+                <template if:true={pipelineUpdating}>
+                    <div class="loading-overlay">
+                        <lightning-spinner alternative-text="Updating..." size="medium"></lightning-spinner>
+                        <p class="loading-text">Updating pipeline...</p>
+                    </div>
+                </template>
+
+                <!-- Job Selector -->
+                <div class="pipeline-toolbar">
+                    <lightning-combobox
+                        label="Select Job"
+                        value={selectedPipelineJobId}
+                        options={pipelineJobOptions}
+                        onchange={handlePipelineJobSelect}
+                        class="pipeline-job-select"
+                        variant="label-hidden"
+                        placeholder="Select a job to view pipeline...">
+                    </lightning-combobox>
+                    <template if:true={pipelineStats}>
+                        <div class="pipeline-stats-bar">
+                            <div class="pipe-stat">
+                                <span class="pipe-stat-num">{pipelineStats.totalActive}</span>
+                                <span class="pipe-stat-label">Active</span>
+                            </div>
+                            <div class="pipe-stat stat-hired">
+                                <span class="pipe-stat-num">{pipelineStats.totalHired}</span>
+                                <span class="pipe-stat-label">Hired</span>
+                            </div>
+                            <div class="pipe-stat stat-rejected">
+                                <span class="pipe-stat-num">{pipelineStats.totalRejected}</span>
+                                <span class="pipe-stat-label">Rejected</span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Kanban Board -->
+                <template if:true={hasPipelineJob}>
+                    <template if:true={pipelineLoading}>
+                        <div class="loading-wrap">
+                            <lightning-spinner alternative-text="Loading pipeline..." size="medium"></lightning-spinner>
+                            <p class="loading-text">Loading pipeline...</p>
+                        </div>
+                    </template>
+                    <template if:false={pipelineLoading}>
+                        <div class="kanban-board">
+                            <template for:each={stages} for:item="stage">
+                                <div key={stage.name} class={stage.columnClass}
+                                     ondrop={handleDrop}
+                                     ondragover={handleDragOver}
+                                     ondragleave={handleDragLeave}
+                                     data-stage={stage.name}>
+
+                                    <div class="column-header">
+                                        <div class="column-header-left">
+                                            <span class={stage.dotClass}></span>
+                                            <span class="column-title">{stage.label}</span>
+                                        </div>
+                                        <span class="column-count">{stage.count}</span>
+                                    </div>
+
+                                    <div class="column-body">
+                                        <template for:each={stage.applications} for:item="app">
+                                            <div key={app.id}
+                                                 class="candidate-card"
+                                                 draggable="true"
+                                                 ondragstart={handleDragStart}
+                                                 onclick={handlePipelineCardClick}
+                                                 data-id={app.id}>
+
+                                                <div class="card-header">
+                                                    <div class="avatar">{app.initials}</div>
+                                                    <div class="card-header-info">
+                                                        <p class="card-name">{app.candidateName}</p>
+                                                        <p class="card-title">{app.currentJobTitle}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card-body">
+                                                    <template if:true={app.overallRating}>
+                                                        <div class="card-rating">
+                                                            <template for:each={app.stars} for:item="star">
+                                                                <span key={star.index} class={star.class}>&#9733;</span>
+                                                            </template>
+                                                        </div>
+                                                    </template>
+                                                    <div class="card-meta">
+                                                        <template if:true={app.source}>
+                                                            <span class="card-badge source-badge">{app.source}</span>
+                                                        </template>
+                                                        <span class="card-days">{app.daysInStage}d</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        <template if:false={stage.hasApplications}>
+                                            <div class="empty-column">
+                                                <p>No candidates</p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </template>
+
+                <!-- No Job Selected -->
+                <template if:false={hasPipelineJob}>
+                    <div class="empty-state">
+                        <lightning-icon icon-name="utility:kanban" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                        <h2 class="slds-text-heading_small">Select a Job</h2>
+                        <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                            Choose a job from the dropdown above to view its candidate pipeline.
+                        </p>
+                    </div>
+                </template>
+        </div>
+    </div>
+
+    <!-- ═══════════ JOB MODAL ═══════════ -->
+    <template if:true={showJobModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium" role="dialog" aria-modal="true">
+            <div class="slds-modal__container">
+                <lightning-button-icon class="slds-modal__close" icon-name="utility:close" variant="bare-inverse" alternative-text="Close" onclick={handleCloseJobModal}></lightning-button-icon>
+                <div class="slds-modal__header">
+                    <h2 class="slds-modal__title">{jobModalTitle}</h2>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <!-- Saving overlay -->
+                    <template if:true={isSavingJob}>
+                        <div class="modal-saving-overlay">
+                            <lightning-spinner alternative-text="Saving..." size="medium"></lightning-spinner>
+                            <p class="overlay-text">Saving job...</p>
+                        </div>
+                    </template>
+
+                    <div class="modal-form-grid">
+                        <lightning-input
+                            label="Job Title"
+                            value={jobForm.Title__c}
+                            data-field="Title__c"
+                            onchange={handleJobFormChange}
+                            required
+                            class="modal-field full-width">
+                        </lightning-input>
+
+                        <lightning-input
+                            label="Department"
+                            value={jobForm.Department__c}
+                            data-field="Department__c"
+                            onchange={handleJobFormChange}
+                            class="modal-field">
+                        </lightning-input>
+
+                        <lightning-input
+                            label="Location"
+                            value={jobForm.Location__c}
+                            data-field="Location__c"
+                            onchange={handleJobFormChange}
+                            class="modal-field">
+                        </lightning-input>
+
+                        <lightning-combobox
+                            label="Job Type"
+                            value={jobForm.Job_Type__c}
+                            options={jobTypeOptions}
+                            data-field="Job_Type__c"
+                            onchange={handleJobFormComboChange}
+                            class="modal-field">
+                        </lightning-combobox>
+
+                        <lightning-combobox
+                            label="Status"
+                            value={jobForm.Status__c}
+                            options={statusOptions}
+                            data-field="Status__c"
+                            onchange={handleJobFormComboChange}
+                            class="modal-field">
+                        </lightning-combobox>
+
+                        <lightning-combobox
+                            label="Priority"
+                            value={jobForm.Priority__c}
+                            options={priorityOptions}
+                            data-field="Priority__c"
+                            onchange={handleJobFormComboChange}
+                            class="modal-field">
+                        </lightning-combobox>
+
+                        <lightning-input
+                            label="Number of Openings"
+                            type="number"
+                            value={jobForm.Number_of_Openings__c}
+                            data-field="Number_of_Openings__c"
+                            onchange={handleJobFormChange}
+                            min="1"
+                            class="modal-field">
+                        </lightning-input>
+
+                        <lightning-input
+                            label="Salary Min"
+                            type="number"
+                            value={jobForm.Salary_Min__c}
+                            data-field="Salary_Min__c"
+                            onchange={handleJobFormChange}
+                            formatter="currency"
+                            step="1000"
+                            class="modal-field">
+                        </lightning-input>
+
+                        <lightning-input
+                            label="Salary Max"
+                            type="number"
+                            value={jobForm.Salary_Max__c}
+                            data-field="Salary_Max__c"
+                            onchange={handleJobFormChange}
+                            formatter="currency"
+                            step="1000"
+                            class="modal-field">
+                        </lightning-input>
+
+                        <lightning-textarea
+                            label="Description"
+                            value={jobForm.Description__c}
+                            data-field="Description__c"
+                            onchange={handleJobFormChange}
+                            class="modal-field full-width">
+                        </lightning-textarea>
+
+                        <lightning-textarea
+                            label="Requirements"
+                            value={jobForm.Requirements__c}
+                            data-field="Requirements__c"
+                            onchange={handleJobFormChange}
+                            class="modal-field full-width">
+                        </lightning-textarea>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleCloseJobModal}
+                        disabled={isSavingJob}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label={saveJobButtonLabel}
+                        variant="brand"
+                        onclick={handleSaveJob}
+                        disabled={isSaveJobDisabled}>
+                    </lightning-button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════════ CANDIDATE DETAIL MODAL ═══════════ -->
+    <template if:true={showCandidateModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_large" role="dialog" aria-modal="true">
+            <div class="slds-modal__container">
+                <lightning-button-icon class="slds-modal__close" icon-name="utility:close" variant="bare-inverse" alternative-text="Close" onclick={handleCloseCandidateModal}></lightning-button-icon>
+                <div class="slds-modal__header">
+                    <div class="cd-header">
+                        <div class="cd-avatar">{selectedCandidate.initials}</div>
+                        <div class="cd-header-info">
+                            <h2 class="cd-name">{selectedCandidate.name}</h2>
+                            <p class="cd-title-company">
+                                <template if:true={selectedCandidate.currentJobTitle}>{selectedCandidate.currentJobTitle}</template>
+                                <template if:true={selectedCandidate.currentCompany}><template if:true={selectedCandidate.currentJobTitle}> @ </template>{selectedCandidate.currentCompany}</template>
+                            </p>
+                        </div>
+                        <template if:true={selectedCandidate.candidateSource}>
+                            <span class={selectedCandidate.sourceBadgeClass}>{selectedCandidate.candidateSource}</span>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <!-- Assign to Job -->
+                    <div class="cd-assign-section">
+                        <h3 class="cd-section-title">
+                            <lightning-icon icon-name="utility:assignment" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                            Assign to Job
+                        </h3>
+                        <div class="cd-assign-row">
+                            <lightning-combobox
+                                label="Job"
+                                value={assignJobId}
+                                options={jobOptions}
+                                onchange={handleAssignJobSelect}
+                                variant="label-hidden"
+                                placeholder="Select a job..."
+                                class="cd-assign-job">
+                            </lightning-combobox>
+                            <lightning-combobox
+                                label="Source"
+                                value={assignSource}
+                                options={sourceOptions}
+                                onchange={handleAssignSourceSelect}
+                                variant="label-hidden"
+                                class="cd-assign-source">
+                            </lightning-combobox>
+                            <lightning-button
+                                label={assignButtonLabel}
+                                variant="brand"
+                                icon-name="utility:add"
+                                onclick={handleAssignToJob}
+                                disabled={isAssignDisabled}>
+                            </lightning-button>
+                        </div>
+                    </div>
+
+                    <!-- Contact Info Row -->
+                    <div class="cd-contact-row">
+                        <template if:true={selectedCandidate.email}>
+                            <div class="cd-contact-item">
+                                <lightning-icon icon-name="utility:email" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                {selectedCandidate.email}
+                            </div>
+                        </template>
+                        <template if:true={selectedCandidate.phone}>
+                            <div class="cd-contact-item">
+                                <lightning-icon icon-name="utility:call" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                {selectedCandidate.phone}
+                            </div>
+                        </template>
+                        <template if:true={selectedCandidate.linkedInUrl}>
+                            <div class="cd-contact-item">
+                                <lightning-icon icon-name="utility:socialshare" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                LinkedIn
+                            </div>
+                        </template>
+                        <template if:true={selectedCandidate.availability}>
+                            <div class="cd-contact-item">
+                                <lightning-icon icon-name="utility:clock" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                {selectedCandidate.availability}
+                            </div>
+                        </template>
+                        <template if:true={selectedCandidate.yearsOfExperience}>
+                            <div class="cd-contact-item">
+                                <lightning-icon icon-name="utility:trending" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                {selectedCandidate.yearsOfExperience} years exp.
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Professional Summary -->
+                    <template if:true={selectedCandidate.professionalSummary}>
+                        <div class="cd-section">
+                            <h3 class="cd-section-title">
+                                <lightning-icon icon-name="utility:identity" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Professional Summary
+                            </h3>
+                            <p class="cd-summary-text">{selectedCandidate.professionalSummary}</p>
+                        </div>
+                    </template>
+
+                    <!-- Skills -->
+                    <template if:true={selectedCandidate.skills}>
+                        <div class="cd-section">
+                            <h3 class="cd-section-title">
+                                <lightning-icon icon-name="utility:light_bulb" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Skills
+                            </h3>
+                            <div class="cd-tags">
+                                <template for:each={selectedCandidate.allSkillTags} for:item="skill">
+                                    <span key={skill} class="tag skill-tag">{skill}</span>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Languages -->
+                    <template if:true={selectedCandidate.languages}>
+                        <div class="cd-section">
+                            <h3 class="cd-section-title">
+                                <lightning-icon icon-name="utility:world" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Languages
+                            </h3>
+                            <div class="cd-tags">
+                                <template for:each={selectedCandidate.allLanguageTags} for:item="lang">
+                                    <span key={lang} class="tag lang-tag">{lang}</span>
+                                </template>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Education -->
+                    <template if:true={selectedCandidate.educationSummary}>
+                        <div class="cd-section">
+                            <h3 class="cd-section-title">
+                                <lightning-icon icon-name="utility:knowledge_base" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Education
+                            </h3>
+                            <p class="cd-preformatted">{selectedCandidate.educationSummary}</p>
+                        </div>
+                    </template>
+
+                    <!-- Work Experience -->
+                    <template if:true={selectedCandidate.workExperience}>
+                        <div class="cd-section">
+                            <h3 class="cd-section-title">
+                                <lightning-icon icon-name="utility:work_order_type" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Work Experience
+                            </h3>
+                            <p class="cd-preformatted">{selectedCandidate.workExperience}</p>
+                        </div>
+                    </template>
+
+                    <!-- Candidate Interviews Section -->
+                    <div class="cd-section cd-interviews-section">
+                        <div class="pd-section-header">
+                            <h3 class="cd-section-title">
+                                <lightning-icon icon-name="utility:event" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Interviews ({candidateInterviewCount})
+                            </h3>
+                            <template if:true={canAddCandidateInterview}>
+                                <lightning-button
+                                    label="Add Interview"
+                                    variant="neutral"
+                                    icon-name="utility:add"
+                                    onclick={handleShowCandidateInterviewForm}
+                                    class="slds-button_small">
+                                </lightning-button>
+                            </template>
+                        </div>
+
+                        <!-- Loading -->
+                        <template if:true={candidateInterviewsLoading}>
+                            <div class="loading-wrap" style="padding: 24px;">
+                                <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
+                            </div>
+                        </template>
+
+                        <template if:false={candidateInterviewsLoading}>
+                            <!-- Interview Form -->
+                            <template if:true={showInterviewForm}>
+                                <template if:true={isInterviewFormCandidateContext}>
+                                    <div class="pd-interview-form">
+                                        <div class="pd-form-grid">
+                                            <template if:true={isNewInterview}>
+                                                <lightning-combobox
+                                                    label="Job / Application"
+                                                    value={interviewForm.Application__c}
+                                                    options={candidateAppOptions}
+                                                    onchange={handleInterviewFormCombo}
+                                                    data-field="Application__c"
+                                                    required
+                                                    class="pd-form-field">
+                                                </lightning-combobox>
+                                            </template>
+                                            <template if:false={isNewInterview}>
+                                                <div class="pd-form-field">
+                                                    <p class="form-job-label">
+                                                        <strong>Job:</strong> {editingInterviewJobTitle}
+                                                    </p>
+                                                </div>
+                                            </template>
+                                            <lightning-combobox
+                                                label="Interview Type"
+                                                value={interviewForm.Interview_Type__c}
+                                                options={interviewTypeOptions}
+                                                onchange={handleInterviewFormCombo}
+                                                data-field="Interview_Type__c"
+                                                required
+                                                class="pd-form-field">
+                                            </lightning-combobox>
+                                            <lightning-input
+                                                label="Date &amp; Time"
+                                                type="datetime"
+                                                value={interviewForm.Scheduled_Date__c}
+                                                data-field="Scheduled_Date__c"
+                                                onchange={handleInterviewFormChange}
+                                                required
+                                                class="pd-form-field">
+                                            </lightning-input>
+                                            <lightning-combobox
+                                                label="Status"
+                                                value={interviewForm.Status__c}
+                                                options={interviewStatusOptions}
+                                                onchange={handleInterviewFormCombo}
+                                                data-field="Status__c"
+                                                required
+                                                class="pd-form-field">
+                                            </lightning-combobox>
+                                            <lightning-input
+                                                label="Round"
+                                                type="number"
+                                                value={interviewForm.Round__c}
+                                                data-field="Round__c"
+                                                onchange={handleInterviewFormChange}
+                                                required
+                                                min="1"
+                                                class="pd-form-field">
+                                            </lightning-input>
+                                            <lightning-combobox
+                                                label="Interviewer 1"
+                                                value={interviewForm.Interviewer__c}
+                                                options={userOptions}
+                                                onchange={handleInterviewFormCombo}
+                                                data-field="Interviewer__c"
+                                                class="pd-form-field">
+                                            </lightning-combobox>
+                                            <lightning-combobox
+                                                label="Interviewer 2"
+                                                value={interviewForm.Interviewer_2__c}
+                                                options={userOptions}
+                                                onchange={handleInterviewFormCombo}
+                                                data-field="Interviewer_2__c"
+                                                class="pd-form-field">
+                                            </lightning-combobox>
+                                            <lightning-input
+                                                label="Duration (minutes)"
+                                                type="number"
+                                                value={interviewForm.Duration_Minutes__c}
+                                                data-field="Duration_Minutes__c"
+                                                onchange={handleInterviewFormChange}
+                                                class="pd-form-field">
+                                            </lightning-input>
+                                            <lightning-input
+                                                label="Location"
+                                                value={interviewForm.Location__c}
+                                                data-field="Location__c"
+                                                onchange={handleInterviewFormChange}
+                                                class="pd-form-field">
+                                            </lightning-input>
+                                        </div>
+                                        <lightning-textarea
+                                            label="Notes / Feedback"
+                                            value={interviewForm.Notes__c}
+                                            data-field="Notes__c"
+                                            onchange={handleInterviewFormChange}
+                                            placeholder="How did the interview go? Key observations, strengths, concerns..."
+                                            class="slds-m-top_small">
+                                        </lightning-textarea>
+                                        <div class="pd-form-actions">
+                                            <lightning-button
+                                                label="Cancel"
+                                                onclick={handleCancelInterview}
+                                                class="slds-m-right_small">
+                                            </lightning-button>
+                                            <lightning-button
+                                                label={saveInterviewButtonLabel}
+                                                variant="brand"
+                                                onclick={handleSaveInterview}
+                                                disabled={isSaveInterviewDisabled}>
+                                            </lightning-button>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+
+                            <!-- Interview List -->
+                            <template if:true={hasCandidateInterviews}>
+                                <div class="pd-interview-list">
+                                    <template for:each={candidateInterviews} for:item="iv">
+                                        <div key={iv.id} class="pd-interview-card">
+                                            <div class="pd-iv-header">
+                                                <div class="pd-iv-type-wrap">
+                                                    <span class="pd-iv-round">Round {iv.round}</span>
+                                                    <span class="pd-iv-type">{iv.interviewType}</span>
+                                                    <template if:true={iv.jobTitle}>
+                                                        <span class="pd-iv-job">{iv.jobTitle}</span>
+                                                    </template>
+                                                </div>
+                                                <div class="pd-iv-actions">
+                                                    <span class={iv.statusBadgeClass}>{iv.status}</span>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:edit"
+                                                        alternative-text="Edit"
+                                                        size="small"
+                                                        data-id={iv.id}
+                                                        onclick={handleEditInterview}
+                                                        variant="bare"
+                                                        class="iv-action-btn">
+                                                    </lightning-button-icon>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:delete"
+                                                        alternative-text="Delete"
+                                                        size="small"
+                                                        data-id={iv.id}
+                                                        onclick={handleDeleteInterview}
+                                                        variant="bare"
+                                                        class="iv-action-btn iv-delete-btn">
+                                                    </lightning-button-icon>
+                                                </div>
+                                            </div>
+                                            <div class="pd-iv-meta">
+                                                <template if:true={iv.scheduledDate}>
+                                                    <span class="pd-iv-date">{iv.formattedDate}</span>
+                                                </template>
+                                                <template if:true={iv.durationMinutes}>
+                                                    <span class="pd-iv-duration">{iv.durationMinutes} min</span>
+                                                </template>
+                                                <template if:true={iv.hasInterviewers}>
+                                                    <span class="pd-iv-interviewer">
+                                                        <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                        {iv.interviewersDisplay}
+                                                    </span>
+                                                </template>
+                                            </div>
+                                            <template if:true={iv.notes}>
+                                                <p class="pd-iv-notes">{iv.notes}</p>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- No Interviews -->
+                            <template if:false={hasCandidateInterviews}>
+                                <template if:false={showInterviewForm}>
+                                    <div class="pd-no-interviews">
+                                        <template if:true={canAddCandidateInterview}>
+                                            <p>No interviews recorded yet. Click "Add Interview" to log one.</p>
+                                        </template>
+                                        <template if:false={canAddCandidateInterview}>
+                                            <p>No interviews yet. Assign to a job first to add interviews.</p>
+                                        </template>
+                                    </div>
+                                </template>
+                            </template>
+                        </template>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <lightning-button
+                        label="Close"
+                        onclick={handleCloseCandidateModal}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label="View Full Record"
+                        variant="brand"
+                        icon-name="utility:new_window"
+                        onclick={handleViewCandidateRecord}>
+                    </lightning-button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════════ PIPELINE APPLICATION DETAIL MODAL ═══════════ -->
+    <template if:true={showPipelineDetailModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_large" role="dialog" aria-modal="true">
+            <div class="slds-modal__container">
+                <lightning-button-icon class="slds-modal__close" icon-name="utility:close" variant="bare-inverse" alternative-text="Close" onclick={handleClosePipelineDetail}></lightning-button-icon>
+                <div class="slds-modal__header">
+                    <div class="pd-header">
+                        <div class="pd-avatar">{pipelineDetail.initials}</div>
+                        <div class="pd-header-info">
+                            <h2 class="pd-name">{pipelineDetail.candidateName}</h2>
+                            <template if:true={pipelineDetail.currentJobTitle}>
+                                <p class="pd-title">{pipelineDetail.currentJobTitle}</p>
+                            </template>
+                        </div>
+                        <span class={pipelineDetail.stageBadgeClass}>{pipelineDetail.stage}</span>
+                    </div>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <!-- Loading -->
+                    <template if:true={pipelineDetailLoading}>
+                        <div class="loading-wrap">
+                            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+                        </div>
+                    </template>
+
+                    <template if:false={pipelineDetailLoading}>
+                        <!-- Quick Info -->
+                        <div class="pd-info-row">
+                            <template if:true={pipelineDetail.candidateEmail}>
+                                <div class="pd-info-item">
+                                    <lightning-icon icon-name="utility:email" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    {pipelineDetail.candidateEmail}
+                                </div>
+                            </template>
+                            <template if:true={pipelineDetail.candidatePhone}>
+                                <div class="pd-info-item">
+                                    <lightning-icon icon-name="utility:call" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    {pipelineDetail.candidatePhone}
+                                </div>
+                            </template>
+                            <template if:true={pipelineDetail.source}>
+                                <div class="pd-info-item">
+                                    <lightning-icon icon-name="utility:link" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    {pipelineDetail.source}
+                                </div>
+                            </template>
+                            <template if:true={pipelineDetail.appliedDate}>
+                                <div class="pd-info-item">
+                                    <lightning-icon icon-name="utility:date_input" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Applied {pipelineDetail.formattedAppliedDate}
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Rating -->
+                        <div class="pd-rating-section">
+                            <h3 class="pd-section-title">
+                                <lightning-icon icon-name="utility:favorite" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Overall Rating
+                            </h3>
+                            <div class="pd-stars">
+                                <template for:each={pipelineDetailStars} for:item="star">
+                                    <span key={star.index}
+                                          class={star.class}
+                                          data-rating={star.index}
+                                          onclick={handleRatingClick}>&#9733;</span>
+                                </template>
+                                <template if:true={pipelineDetail.overallRating}>
+                                    <span class="pd-rating-value">{pipelineDetail.overallRating}/5</span>
+                                </template>
+                            </div>
+                        </div>
+
+                        <!-- Interviews Section -->
+                        <div class="pd-interviews-section">
+                            <div class="pd-section-header">
+                                <h3 class="pd-section-title">
+                                    <lightning-icon icon-name="utility:event" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Interviews ({pipelineDetail.interviewCount})
+                                </h3>
+                                <lightning-button
+                                    label="Add Interview"
+                                    variant="neutral"
+                                    icon-name="utility:add"
+                                    onclick={handleShowInterviewForm}
+                                    class="slds-button_small">
+                                </lightning-button>
+                            </div>
+
+                            <!-- Add Interview Form -->
+                            <template if:true={showInterviewForm}>
+                                <div class="pd-interview-form">
+                                    <div class="pd-form-grid">
+                                        <lightning-combobox
+                                            label="Interview Type"
+                                            value={interviewForm.Interview_Type__c}
+                                            options={interviewTypeOptions}
+                                            onchange={handleInterviewFormCombo}
+                                            data-field="Interview_Type__c"
+                                            required
+                                            class="pd-form-field">
+                                        </lightning-combobox>
+                                        <lightning-input
+                                            label="Date & Time"
+                                            type="datetime"
+                                            value={interviewForm.Scheduled_Date__c}
+                                            data-field="Scheduled_Date__c"
+                                            onchange={handleInterviewFormChange}
+                                            required
+                                            class="pd-form-field">
+                                        </lightning-input>
+                                        <lightning-combobox
+                                            label="Status"
+                                            value={interviewForm.Status__c}
+                                            options={interviewStatusOptions}
+                                            onchange={handleInterviewFormCombo}
+                                            data-field="Status__c"
+                                            required
+                                            class="pd-form-field">
+                                        </lightning-combobox>
+                                        <lightning-input
+                                            label="Round"
+                                            type="number"
+                                            value={interviewForm.Round__c}
+                                            data-field="Round__c"
+                                            onchange={handleInterviewFormChange}
+                                            required
+                                            min="1"
+                                            class="pd-form-field">
+                                        </lightning-input>
+                                        <lightning-combobox
+                                            label="Interviewer 1"
+                                            value={interviewForm.Interviewer__c}
+                                            options={userOptions}
+                                            onchange={handleInterviewFormCombo}
+                                            data-field="Interviewer__c"
+                                            class="pd-form-field">
+                                        </lightning-combobox>
+                                        <lightning-combobox
+                                            label="Interviewer 2"
+                                            value={interviewForm.Interviewer_2__c}
+                                            options={userOptions}
+                                            onchange={handleInterviewFormCombo}
+                                            data-field="Interviewer_2__c"
+                                            class="pd-form-field">
+                                        </lightning-combobox>
+                                        <lightning-input
+                                            label="Duration (minutes)"
+                                            type="number"
+                                            value={interviewForm.Duration_Minutes__c}
+                                            data-field="Duration_Minutes__c"
+                                            onchange={handleInterviewFormChange}
+                                            class="pd-form-field">
+                                        </lightning-input>
+                                        <lightning-input
+                                            label="Location"
+                                            value={interviewForm.Location__c}
+                                            data-field="Location__c"
+                                            onchange={handleInterviewFormChange}
+                                            class="pd-form-field">
+                                        </lightning-input>
+                                    </div>
+                                    <lightning-textarea
+                                        label="Notes / Feedback"
+                                        value={interviewForm.Notes__c}
+                                        data-field="Notes__c"
+                                        onchange={handleInterviewFormChange}
+                                        placeholder="How did the interview go? Key observations, strengths, concerns..."
+                                        class="slds-m-top_small">
+                                    </lightning-textarea>
+                                    <div class="pd-form-actions">
+                                        <lightning-button
+                                            label="Cancel"
+                                            onclick={handleCancelInterview}
+                                            class="slds-m-right_small">
+                                        </lightning-button>
+                                        <lightning-button
+                                            label={saveInterviewButtonLabel}
+                                            variant="brand"
+                                            onclick={handleSaveInterview}
+                                            disabled={isSaveInterviewDisabled}>
+                                        </lightning-button>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Interview List -->
+                            <template if:true={pipelineDetail.hasInterviews}>
+                                <div class="pd-interview-list">
+                                    <template for:each={pipelineDetail.interviews} for:item="iv">
+                                        <div key={iv.id} class="pd-interview-card">
+                                            <div class="pd-iv-header">
+                                                <div class="pd-iv-type-wrap">
+                                                    <span class="pd-iv-round">Round {iv.round}</span>
+                                                    <span class="pd-iv-type">{iv.interviewType}</span>
+                                                </div>
+                                                <div class="pd-iv-actions">
+                                                    <span class={iv.statusBadgeClass}>{iv.status}</span>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:edit"
+                                                        alternative-text="Edit"
+                                                        size="small"
+                                                        data-id={iv.id}
+                                                        onclick={handleEditInterview}
+                                                        variant="bare"
+                                                        class="iv-action-btn">
+                                                    </lightning-button-icon>
+                                                    <lightning-button-icon
+                                                        icon-name="utility:delete"
+                                                        alternative-text="Delete"
+                                                        size="small"
+                                                        data-id={iv.id}
+                                                        onclick={handleDeleteInterview}
+                                                        variant="bare"
+                                                        class="iv-action-btn iv-delete-btn">
+                                                    </lightning-button-icon>
+                                                </div>
+                                            </div>
+                                            <div class="pd-iv-meta">
+                                                <template if:true={iv.scheduledDate}>
+                                                    <span class="pd-iv-date">{iv.formattedDate}</span>
+                                                </template>
+                                                <template if:true={iv.durationMinutes}>
+                                                    <span class="pd-iv-duration">{iv.durationMinutes} min</span>
+                                                </template>
+                                                <template if:true={iv.hasInterviewers}>
+                                                    <span class="pd-iv-interviewer">
+                                                        <lightning-icon icon-name="utility:user" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                                        {iv.interviewersDisplay}
+                                                    </span>
+                                                </template>
+                                            </div>
+                                            <template if:true={iv.notes}>
+                                                <p class="pd-iv-notes">{iv.notes}</p>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <!-- No Interviews -->
+                            <template if:false={pipelineDetail.hasInterviews}>
+                                <template if:false={showInterviewForm}>
+                                    <div class="pd-no-interviews">
+                                        <p>No interviews recorded yet. Click "Add Interview" to log one.</p>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+                <div class="slds-modal__footer">
+                    <lightning-button
+                        label="Close"
+                        onclick={handleClosePipelineDetail}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label="View Full Record"
+                        variant="brand"
+                        icon-name="utility:new_window"
+                        onclick={handleViewApplicationRecord}>
+                    </lightning-button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Upcoming Interview Edit Modal -->
+    <template if:true={showUpcomingEditModal}>
+        <section class="slds-modal slds-fade-in-open slds-modal_medium" role="dialog" aria-modal="true">
+            <div class="slds-modal__container">
+                <lightning-button-icon class="slds-modal__close" icon-name="utility:close" variant="bare-inverse" alternative-text="Close" onclick={handleCloseUpcomingEdit}></lightning-button-icon>
+                <div class="slds-modal__header">
+                    <h2 class="slds-modal__title">Edit Interview</h2>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">{editingInterviewJobTitle}</p>
+                </div>
+                <div class="slds-modal__content slds-p-around_medium">
+                    <div class="pd-interview-form">
+                        <div class="pd-form-grid">
+                            <lightning-combobox
+                                label="Interview Type"
+                                value={interviewForm.Interview_Type__c}
+                                options={interviewTypeOptions}
+                                onchange={handleInterviewFormCombo}
+                                data-field="Interview_Type__c"
+                                required
+                                class="pd-form-field">
+                            </lightning-combobox>
+                            <lightning-input
+                                label="Date &amp; Time"
+                                type="datetime"
+                                value={interviewForm.Scheduled_Date__c}
+                                data-field="Scheduled_Date__c"
+                                onchange={handleInterviewFormChange}
+                                required
+                                class="pd-form-field">
+                            </lightning-input>
+                            <lightning-combobox
+                                label="Status"
+                                value={interviewForm.Status__c}
+                                options={interviewStatusOptions}
+                                onchange={handleInterviewFormCombo}
+                                data-field="Status__c"
+                                required
+                                class="pd-form-field">
+                            </lightning-combobox>
+                            <lightning-input
+                                label="Round"
+                                type="number"
+                                value={interviewForm.Round__c}
+                                data-field="Round__c"
+                                onchange={handleInterviewFormChange}
+                                required
+                                min="1"
+                                class="pd-form-field">
+                            </lightning-input>
+                            <lightning-combobox
+                                label="Interviewer 1"
+                                value={interviewForm.Interviewer__c}
+                                options={userOptions}
+                                onchange={handleInterviewFormCombo}
+                                data-field="Interviewer__c"
+                                class="pd-form-field">
+                            </lightning-combobox>
+                            <lightning-combobox
+                                label="Interviewer 2"
+                                value={interviewForm.Interviewer_2__c}
+                                options={userOptions}
+                                onchange={handleInterviewFormCombo}
+                                data-field="Interviewer_2__c"
+                                class="pd-form-field">
+                            </lightning-combobox>
+                            <lightning-input
+                                label="Duration (minutes)"
+                                type="number"
+                                value={interviewForm.Duration_Minutes__c}
+                                data-field="Duration_Minutes__c"
+                                onchange={handleInterviewFormChange}
+                                class="pd-form-field">
+                            </lightning-input>
+                            <lightning-input
+                                label="Location"
+                                value={interviewForm.Location__c}
+                                data-field="Location__c"
+                                onchange={handleInterviewFormChange}
+                                class="pd-form-field">
+                            </lightning-input>
+                        </div>
+                        <lightning-textarea
+                            label="Notes / Feedback"
+                            value={interviewForm.Notes__c}
+                            data-field="Notes__c"
+                            onchange={handleInterviewFormChange}
+                            placeholder="How did the interview go? Key observations, strengths, concerns..."
+                            class="slds-m-top_small">
+                        </lightning-textarea>
+                    </div>
+                </div>
+                <div class="slds-modal__footer">
+                    <lightning-button
+                        label="Cancel"
+                        onclick={handleCloseUpcomingEdit}
+                        class="slds-m-right_small">
+                    </lightning-button>
+                    <lightning-button
+                        label={saveInterviewButtonLabel}
+                        variant="brand"
+                        onclick={handleSaveInterview}
+                        disabled={isSaveInterviewDisabled}>
+                    </lightning-button>
+                </div>
+            </div>
+        </section>
+        <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+</template>

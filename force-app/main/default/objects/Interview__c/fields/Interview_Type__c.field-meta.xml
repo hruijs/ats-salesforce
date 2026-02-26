@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Interview_Type__c</fullName>
+    <label>Interview Type</label>
+    <required>true</required>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Phone Screen</fullName><default>false</default><label>Phone Screen</label></value>
+            <value><fullName>Video Call</fullName><default>false</default><label>Video Call</label></value>
+            <value><fullName>On-site</fullName><default>false</default><label>On-site</label></value>
+            <value><fullName>Technical</fullName><default>false</default><label>Technical</label></value>
+            <value><fullName>Panel</fullName><default>false</default><label>Panel</label></value>
+            <value><fullName>Culture Fit</fullName><default>false</default><label>Culture Fit</label></value>
+            <value><fullName>Final Round</fullName><default>false</default><label>Final Round</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

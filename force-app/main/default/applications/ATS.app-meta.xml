@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/Metadata">
+    <label>ATS Recruiter</label>
+    <description>Applicant Tracking System - Manage candidates, jobs, interviews, and recruitment pipeline.</description>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <navType>Standard</navType>
+    <tabs>standard-home</tabs>
+    <tabs>ATS_Hub</tabs>
+    <tabs>ATS_Setup</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>

@@ -1,0 +1,288 @@
+:host {
+    --color-new: #0176d3;
+    --color-screening: #9050e9;
+    --color-interview: #dd7a01;
+    --color-evaluation: #0d9dda;
+    --color-offer: #2e844a;
+    --color-hired: #2e844a;
+    --color-border: #e5e5e5;
+    --color-bg: #f3f3f3;
+    --color-card: #ffffff;
+    --color-text: #181818;
+    --color-text-secondary: #706e6b;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.08);
+    --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.pipeline-container {
+    background: var(--color-bg);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+/* Header */
+.pipeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-info h1 {
+    margin: 0;
+    font-weight: 700;
+}
+
+/* Stats Bar */
+.stats-bar {
+    display: flex;
+    gap: 32px;
+    padding: 12px 24px;
+    background: var(--color-card);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stat-number {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--color-text);
+}
+
+.stat-hired .stat-number {
+    color: var(--color-offer);
+}
+
+.stat-rejected .stat-number {
+    color: #ba0517;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text-secondary);
+}
+
+/* Kanban Board */
+.kanban-board {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    min-height: 500px;
+}
+
+.kanban-column {
+    flex: 1;
+    min-width: 220px;
+    max-width: 300px;
+    border-right: 1px solid #ebebeb;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    transition: background 0.2s ease;
+}
+
+.kanban-column:last-child {
+    border-right: none;
+}
+
+.kanban-column.drag-over {
+    background: #f0f7ff;
+}
+
+/* Column Header */
+.column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #ebebeb;
+    background: var(--color-card);
+}
+
+.column-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.column-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.dot-new { background: var(--color-new); }
+.dot-screening { background: var(--color-screening); }
+.dot-interview { background: var(--color-interview); }
+.dot-evaluation { background: var(--color-evaluation); }
+.dot-offer { background: var(--color-offer); }
+.dot-hired { background: var(--color-hired); }
+
+.column-title {
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--color-text);
+}
+
+.column-count {
+    background: #e5e5e5;
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Column Body */
+.column-body {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+}
+
+/* Candidate Card */
+.candidate-card {
+    background: var(--color-card);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-card);
+    cursor: grab;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+}
+
+.candidate-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-1px);
+}
+
+.candidate-card.dragging {
+    opacity: 0.4;
+    transform: rotate(2deg);
+}
+
+.card-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 800;
+    flex-shrink: 0;
+    letter-spacing: 0.5px;
+}
+
+.card-header-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.card-name {
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--color-text);
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-title {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin: 2px 0 0 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-body {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-rating {
+    display: flex;
+    gap: 1px;
+}
+
+.star {
+    font-size: 0.75rem;
+}
+
+.star.filled {
+    color: #f5a623;
+}
+
+.star.empty {
+    color: #d8d8d8;
+}
+
+.card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.card-badge {
+    font-size: 0.625rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.source-badge {
+    background: #f0f0f0;
+    color: var(--color-text-secondary);
+}
+
+.card-days {
+    font-size: 0.6875rem;
+    color: #939393;
+    font-weight: 600;
+}
+
+/* Empty Column */
+.empty-column {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 16px;
+    color: #c0c0c0;
+    font-size: 0.8125rem;
+    font-style: italic;
+}

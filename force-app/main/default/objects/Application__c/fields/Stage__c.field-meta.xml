@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Stage__c</fullName>
+    <label>Stage</label>
+    <required>true</required>
+    <trackFeedHistory>true</trackFeedHistory>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>New</fullName><default>true</default><label>New</label></value>
+            <value><fullName>Screening</fullName><default>false</default><label>Screening</label></value>
+            <value><fullName>Interview</fullName><default>false</default><label>Interview</label></value>
+            <value><fullName>Evaluation</fullName><default>false</default><label>Evaluation</label></value>
+            <value><fullName>Offer</fullName><default>false</default><label>Offer</label></value>
+            <value><fullName>Hired</fullName><default>false</default><label>Hired</label></value>
+            <value><fullName>Rejected</fullName><default>false</default><label>Rejected</label></value>
+            <value><fullName>Withdrawn</fullName><default>false</default><label>Withdrawn</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

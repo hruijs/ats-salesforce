@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Interviewer__c</fullName>
+    <deleteConstraint>SetNull</deleteConstraint>
+    <label>Interviewer</label>
+    <referenceTo>User</referenceTo>
+    <relationshipName>Scorecards</relationshipName>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Lookup</type>
+</CustomField>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Rejection_Reason__c</fullName>
+    <label>Rejection Reason</label>
+    <required>false</required>
+    <trackFeedHistory>false</trackFeedHistory>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Not Qualified</fullName><default>false</default><label>Not Qualified</label></value>
+            <value><fullName>Failed Assessment</fullName><default>false</default><label>Failed Assessment</label></value>
+            <value><fullName>No Show</fullName><default>false</default><label>No Show</label></value>
+            <value><fullName>Salary Mismatch</fullName><default>false</default><label>Salary Mismatch</label></value>
+            <value><fullName>Culture Fit</fullName><default>false</default><label>Culture Fit</label></value>
+            <value><fullName>Position Filled</fullName><default>false</default><label>Position Filled</label></value>
+            <value><fullName>Position Cancelled</fullName><default>false</default><label>Position Cancelled</label></value>
+            <value><fullName>Accepted Other Offer</fullName><default>false</default><label>Accepted Other Offer</label></value>
+            <value><fullName>Other</fullName><default>false</default><label>Other</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

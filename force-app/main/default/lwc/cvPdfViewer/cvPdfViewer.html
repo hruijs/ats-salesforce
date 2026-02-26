@@ -1,0 +1,260 @@
+<template>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <lightning-icon icon-name="standard:document" size="medium"></lightning-icon>
+                <div class="header-text">
+                    <h1 class="slds-text-heading_medium">CV Processing</h1>
+                    <p class="slds-text-body_small slds-text-color_weak" if:true={cvFileName}>
+                        {cvFileName}
+                    </p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <lightning-button
+                    label="Parse CV"
+                    variant="brand"
+                    icon-name="utility:magicwand"
+                    onclick={handleParseCv}
+                    disabled={isParseDisabled}
+                    class="slds-m-right_small">
+                </lightning-button>
+                <lightning-button
+                    label="Save to Contact"
+                    variant="success"
+                    icon-name="utility:save"
+                    onclick={handleSave}
+                    disabled={isSaveDisabled}>
+                </lightning-button>
+            </div>
+        </div>
+
+        <!-- Status Banner -->
+        <template if:true={isParsing}>
+            <div class="parsing-banner">
+                <lightning-spinner alternative-text="Parsing..." size="small" class="slds-m-right_small"></lightning-spinner>
+                <span>AI is reading your CV... This may take a few seconds.</span>
+            </div>
+        </template>
+        <template if:true={parseSuccess}>
+            <div class="success-banner">
+                <lightning-icon icon-name="utility:success" size="x-small" variant="inverse" class="slds-m-right_small"></lightning-icon>
+                <span>CV successfully parsed! Review the data below and click Save.</span>
+            </div>
+        </template>
+        <template if:true={parseError}>
+            <div class="error-banner">
+                <lightning-icon icon-name="utility:error" size="x-small" variant="inverse" class="slds-m-right_small"></lightning-icon>
+                <span>{errorMessage}</span>
+            </div>
+        </template>
+
+        <!-- Main Content: Side by Side -->
+        <div class="content-grid">
+            <!-- Left: PDF Preview -->
+            <div class="pdf-panel">
+                <div class="panel-header">
+                    <lightning-icon icon-name="doctype:pdf" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <span class="panel-title">PDF Preview</span>
+                </div>
+                <div class="pdf-container">
+                    <template if:true={pdfUrl}>
+                        <iframe src={pdfUrl} class="pdf-iframe" title="CV Preview"></iframe>
+                    </template>
+                    <template if:false={pdfUrl}>
+                        <div class="empty-state">
+                            <lightning-icon icon-name="doctype:pdf" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                            <h2 class="slds-text-heading_small slds-m-bottom_x-small">No CV Uploaded</h2>
+                            <p class="slds-text-body_small slds-text-color_weak">
+                                Upload a PDF file to this contact record to get started.
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Right: Extracted Data -->
+            <div class="data-panel">
+                <div class="panel-header">
+                    <lightning-icon icon-name="utility:user" size="small" class="slds-m-right_x-small"></lightning-icon>
+                    <span class="panel-title">Extracted Data</span>
+                </div>
+                <div class="data-container">
+                    <template if:true={hasData}>
+                        <!-- Personal Info Section -->
+                        <div class="data-section">
+                            <h3 class="section-title">
+                                <lightning-icon icon-name="utility:identity" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Personal Information
+                            </h3>
+                            <div class="form-grid">
+                                <lightning-input
+                                    label="First Name"
+                                    value={parsedData.firstName}
+                                    data-field="firstName"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                                <lightning-input
+                                    label="Last Name"
+                                    value={parsedData.lastName}
+                                    data-field="lastName"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                                <lightning-input
+                                    label="Email"
+                                    type="email"
+                                    value={parsedData.email}
+                                    data-field="email"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                                <lightning-input
+                                    label="Phone"
+                                    type="tel"
+                                    value={parsedData.phone}
+                                    data-field="phone"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                                <lightning-input
+                                    label="LinkedIn URL"
+                                    type="url"
+                                    value={parsedData.linkedInUrl}
+                                    data-field="linkedInUrl"
+                                    onchange={handleFieldChange}
+                                    class="form-field full-width">
+                                </lightning-input>
+                            </div>
+                        </div>
+
+                        <!-- Professional Info Section -->
+                        <div class="data-section">
+                            <h3 class="section-title">
+                                <lightning-icon icon-name="utility:company" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Professional
+                            </h3>
+                            <div class="form-grid">
+                                <lightning-input
+                                    label="Current Job Title"
+                                    value={parsedData.currentJobTitle}
+                                    data-field="currentJobTitle"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                                <lightning-input
+                                    label="Current Company"
+                                    value={parsedData.currentCompany}
+                                    data-field="currentCompany"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                                <lightning-input
+                                    label="Years of Experience"
+                                    type="number"
+                                    value={parsedData.yearsOfExperience}
+                                    data-field="yearsOfExperience"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                                <lightning-input
+                                    label="Availability"
+                                    value={parsedData.availability}
+                                    data-field="availability"
+                                    onchange={handleFieldChange}
+                                    class="form-field">
+                                </lightning-input>
+                            </div>
+                            <lightning-textarea
+                                label="Professional Summary"
+                                value={parsedData.summary}
+                                data-field="summary"
+                                onchange={handleFieldChange}
+                                class="slds-m-top_small">
+                            </lightning-textarea>
+                        </div>
+
+                        <!-- Skills & Languages -->
+                        <div class="data-section">
+                            <h3 class="section-title">
+                                <lightning-icon icon-name="utility:light_bulb" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                Skills & Languages
+                            </h3>
+                            <template if:true={hasSkills}>
+                                <div class="tags-container">
+                                    <template for:each={parsedData.skills} for:item="skill">
+                                        <span key={skill} class="tag skill-tag">{skill}</span>
+                                    </template>
+                                </div>
+                            </template>
+                            <template if:true={hasLanguages}>
+                                <p class="slds-text-body_small slds-text-color_weak slds-m-top_small slds-m-bottom_xx-small">Languages</p>
+                                <div class="tags-container">
+                                    <template for:each={parsedData.languages} for:item="lang">
+                                        <span key={lang} class="tag lang-tag">{lang}</span>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Education -->
+                        <template if:true={hasEducation}>
+                            <div class="data-section">
+                                <h3 class="section-title">
+                                    <lightning-icon icon-name="utility:knowledge_base" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Education
+                                </h3>
+                                <template for:each={parsedData.education} for:item="edu">
+                                    <div key={edu.institution} class="timeline-item">
+                                        <div class="timeline-dot edu-dot"></div>
+                                        <div class="timeline-content">
+                                            <p class="timeline-title">{edu.degree} - {edu.fieldOfStudy}</p>
+                                            <p class="timeline-subtitle">{edu.institution}</p>
+                                            <p class="timeline-date">{edu.startYear} - {edu.endYear}</p>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Work Experience -->
+                        <template if:true={hasWorkExperience}>
+                            <div class="data-section">
+                                <h3 class="section-title">
+                                    <lightning-icon icon-name="utility:work_order_type" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+                                    Work Experience
+                                </h3>
+                                <template for:each={parsedData.workExperience} for:item="exp">
+                                    <div key={exp.company} class="timeline-item">
+                                        <div class="timeline-dot exp-dot"></div>
+                                        <div class="timeline-content">
+                                            <p class="timeline-title">{exp.jobTitle}</p>
+                                            <p class="timeline-subtitle">{exp.company}</p>
+                                            <p class="timeline-date">{exp.startDate} - {exp.endDate}</p>
+                                            <template if:true={exp.description}>
+                                                <p class="timeline-description">{exp.description}</p>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                    </template>
+
+                    <!-- Empty State -->
+                    <template if:false={hasData}>
+                        <div class="empty-state">
+                            <lightning-icon icon-name="utility:magicwand" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                            <h2 class="slds-text-heading_small slds-m-bottom_x-small">Ready to Parse</h2>
+                            <p class="slds-text-body_small slds-text-color_weak">
+                                Click "Parse CV" to extract data from the uploaded PDF using AI.
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

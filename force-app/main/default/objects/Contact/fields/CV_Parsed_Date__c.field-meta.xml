@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>CV_Parsed_Date__c</fullName>
+    <label>CV Parsed Date</label>
+    <required>false</required>
+    <type>DateTime</type>
+</CustomField>

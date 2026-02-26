@@ -1,0 +1,156 @@
+<template>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <div class="header-left">
+                <h1 class="dashboard-title">ATS Dashboard</h1>
+                <p class="dashboard-subtitle">Recruitment Overview</p>
+            </div>
+            <div class="header-right">
+                <lightning-button-icon
+                    icon-name="utility:refresh"
+                    alternative-text="Refresh"
+                    onclick={handleRefresh}
+                    variant="border-filled">
+                </lightning-button-icon>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-row" if:true={hasData}>
+            <div class="summary-card">
+                <div class="summary-icon blue">
+                    <lightning-icon icon-name="utility:cases" size="small" variant="inverse"></lightning-icon>
+                </div>
+                <div class="summary-info">
+                    <span class="summary-number">{totalOpenJobs}</span>
+                    <span class="summary-label">Open Positions</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon purple">
+                    <lightning-icon icon-name="utility:people" size="small" variant="inverse"></lightning-icon>
+                </div>
+                <div class="summary-info">
+                    <span class="summary-number">{totalActiveCandidates}</span>
+                    <span class="summary-label">Active Candidates</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon orange">
+                    <lightning-icon icon-name="utility:event" size="small" variant="inverse"></lightning-icon>
+                </div>
+                <div class="summary-info">
+                    <span class="summary-number">{totalInterviewsThisWeek}</span>
+                    <span class="summary-label">Interviews This Week</span>
+                </div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon green">
+                    <lightning-icon icon-name="utility:check" size="small" variant="inverse"></lightning-icon>
+                </div>
+                <div class="summary-info">
+                    <span class="summary-number">{totalHired}</span>
+                    <span class="summary-label">Hired</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Cards -->
+        <div class="jobs-grid" if:true={hasData}>
+            <template for:each={dashboardData} for:item="item">
+                <div key={item.job.Id} class="job-card">
+                    <!-- Job Header -->
+                    <div class="job-card-header">
+                        <div class="job-info">
+                            <h2 class="job-title">{item.job.Title__c}</h2>
+                            <div class="job-meta">
+                                <template if:true={item.job.Department__c}>
+                                    <span class="meta-badge dept-badge">{item.job.Department__c}</span>
+                                </template>
+                                <template if:true={item.job.Location__c}>
+                                    <span class="meta-badge loc-badge">
+                                        {item.job.Location__c}
+                                    </span>
+                                </template>
+                                <template if:true={item.job.Job_Type__c}>
+                                    <span class="meta-badge type-badge">{item.job.Job_Type__c}</span>
+                                </template>
+                            </div>
+                        </div>
+                        <div class={item.priorityClass}>
+                            {item.job.Priority__c}
+                        </div>
+                    </div>
+
+                    <!-- Mini Pipeline -->
+                    <div class="mini-pipeline">
+                        <div class="pipeline-stage">
+                            <div class="stage-bar new-bar" style={item.newBarStyle}></div>
+                            <span class="stage-count">{item.stats.totalNew}</span>
+                            <span class="stage-name">New</span>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="stage-bar screening-bar" style={item.screeningBarStyle}></div>
+                            <span class="stage-count">{item.stats.totalScreening}</span>
+                            <span class="stage-name">Screen</span>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="stage-bar interview-bar" style={item.interviewBarStyle}></div>
+                            <span class="stage-count">{item.stats.totalInterview}</span>
+                            <span class="stage-name">Interview</span>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="stage-bar eval-bar" style={item.evalBarStyle}></div>
+                            <span class="stage-count">{item.stats.totalEvaluation}</span>
+                            <span class="stage-name">Eval</span>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="stage-bar offer-bar" style={item.offerBarStyle}></div>
+                            <span class="stage-count">{item.stats.totalOffer}</span>
+                            <span class="stage-name">Offer</span>
+                        </div>
+                        <div class="pipeline-stage">
+                            <div class="stage-bar hired-bar" style={item.hiredBarStyle}></div>
+                            <span class="stage-count">{item.stats.totalHired}</span>
+                            <span class="stage-name">Hired</span>
+                        </div>
+                    </div>
+
+                    <!-- Job Footer -->
+                    <div class="job-card-footer">
+                        <div class="footer-stats">
+                            <span class="footer-stat">
+                                <strong>{item.totalApplications}</strong> applications
+                            </span>
+                            <span class="footer-divider">&bull;</span>
+                            <span class="footer-stat">
+                                <strong>{item.interviewsThisWeek}</strong> interviews this week
+                            </span>
+                        </div>
+                        <div class="footer-people" if:true={item.job.Recruiter__r}>
+                            <span class="people-label">Recruiter:</span>
+                            <span class="people-name">{item.job.Recruiter__r.Name}</span>
+                        </div>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Empty State -->
+        <template if:false={hasData}>
+            <div class="empty-dashboard">
+                <lightning-icon icon-name="standard:opportunity" size="large" class="slds-m-bottom_medium"></lightning-icon>
+                <h2 class="slds-text-heading_small">No Open Positions</h2>
+                <p class="slds-text-body_small slds-text-color_weak slds-m-top_small">
+                    Create a new Job record to get started with your recruitment pipeline.
+                </p>
+            </div>
+        </template>
+
+        <!-- Loading -->
+        <template if:true={isLoading}>
+            <lightning-spinner alternative-text="Loading..." size="medium"></lightning-spinner>
+        </template>
+    </div>
+</template>

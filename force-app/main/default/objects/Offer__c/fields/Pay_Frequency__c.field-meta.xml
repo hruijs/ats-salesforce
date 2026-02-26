@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Pay_Frequency__c</fullName>
+    <label>Pay Frequency</label>
+    <required>false</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Annual</fullName><default>true</default><label>Annual</label></value>
+            <value><fullName>Monthly</fullName><default>false</default><label>Monthly</label></value>
+            <value><fullName>Hourly</fullName><default>false</default><label>Hourly</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

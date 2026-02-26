@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Recommendation__c</fullName>
+    <label>Recommendation</label>
+    <required>true</required>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Advance</fullName><default>false</default><label>Advance</label></value>
+            <value><fullName>Hold</fullName><default>false</default><label>Hold</label></value>
+            <value><fullName>Reject</fullName><default>false</default><label>Reject</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

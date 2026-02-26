@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/Metadata">
+    <fullName>Role__c</fullName>
+    <label>Role</label>
+    <required>true</required>
+    <trackHistory>false</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Recruiter</fullName><default>false</default><label>Recruiter</label></value>
+            <value><fullName>Hiring Manager</fullName><default>false</default><label>Hiring Manager</label></value>
+            <value><fullName>Interviewer</fullName><default>false</default><label>Interviewer</label></value>
+            <value><fullName>Coordinator</fullName><default>false</default><label>Coordinator</label></value>
+            <value><fullName>Approver</fullName><default>false</default><label>Approver</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
