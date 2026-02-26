@@ -23,7 +23,7 @@ A complete Applicant Tracking System built as a single Lightning Web Component f
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Computest-ATS/ats-salesforce.git
+git clone https://github.com/hruijs/ats-salesforce.git
 cd ats-salesforce
 
 # 2. Deploy to your target org
